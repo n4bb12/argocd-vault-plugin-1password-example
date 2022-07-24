@@ -1,0 +1,20 @@
+version: "3.4"
+
+services:
+  op-connect-api:
+    image: 1password/connect-api:latest
+    ports:
+      - "7777:8080"
+    volumes:
+      - "./secrets/1password-credentials.json:/home/opuser/.op/1password-credentials.json"
+      - "data:/home/opuser/.op/data"
+  op-connect-sync:
+    image: 1password/connect-sync:latest
+    ports:
+      - "7778:8080"
+    volumes:
+      - "./secrets/1password-credentials.json:/home/opuser/.op/1password-credentials.json"
+      - "data:/home/opuser/.op/data"
+
+volumes:
+  data:
