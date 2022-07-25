@@ -1,10 +1,15 @@
 # Argo CD Vault Plugin Example
 
-## Install kind
+## Install Command-Line Tools
 
-- Install go — https://go.dev/doc/install
-- Install kubectl — https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
-- Install kind — https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+- Install `go` — https://go.dev/doc/install
+- Install `kubectl` — https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
+- Install `kind` — https://kind.sigs.k8s.io/docs/user/quick-start/#installing-from-release-binaries
+- Install `argocd` — https://github.com/argoproj/argo-cd/releases/latest
+- Install `helm` — https://helm.sh/docs/intro/install/
+- Install `op` — https://developer.1password.com/docs/cli/get-started#install
+
+## Create Cluster
 
 ```bash
 kind create cluster --name argocd
@@ -17,17 +22,7 @@ kubectl cluster-info --context kind-argocd
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#kustomize
 
 ```bash
-kubectl create namespace argocd
 kubectl apply -k argocd-vault-plugin
-```
-
-## Install Argo CD CLI
-
-- https://github.com/argoproj/argo-cd/releases/latest
-
-```bash
-kubectl config set-context --current --namespace=argocd
-argocd login --core
 ```
 
 ## Access Argo CD UI
@@ -50,30 +45,7 @@ kubectl config get-contexts -o name
 argocd cluster add kind-argocd
 ```
 
-## Create An Application
-
-```bash
-argocd app create guestbook \
-  --repo https://github.com/argoproj/argocd-example-apps.git \
-  --path guestbook \
-  --dest-server https://kubernetes.default.svc \
-  --dest-namespace default
-
-argocd app get guestbook
-argocd app sync guestbook
-
-kubectl -n default port-forward svc/guestbook-ui 8888:80
-```
-
-## Install Argo CD Vault Plugin
-
-- https://argocd-vault-plugin.readthedocs.io/en/stable/installation/
-
-```
-kubectl apply -k argocd-vault-plugin
-```
-
-## Install 1Password CLI
+## Configure 1Password CLI
 
 - https://developer.1password.com/docs/cli/get-started
 
@@ -101,29 +73,69 @@ op connect server create argocd
 op connect token create argocd --server argocd --vaults argocd
 ```
 
-## Deploy 1Password Connect Server
+## Deploy 1Password Connect Server (Helm)
 
-- Install helm — https://helm.sh/docs/intro/install/
 - https://developer.1password.com/docs/connect/get-started/#step-2-deploy-1password-connect-server
 
 ```bash
 kubectl -n argocd create secret generic argocd-vault-plugin \
   --from-literal=AVP_TYPE=1passwordconnect \
-  --from-literal=OP_CONNECT_HOST=com.1password.connect \
+  --from-literal=OP_CONNECT_HOST=http://onepassword-connect:8080 \
   --from-literal=OP_CONNECT_TOKEN=$(cat secrets/1password-token.txt)
 
 helm repo add 1password https://1password.github.io/connect-helm-charts/
 
 helm delete 1password-connect || true
 
+# only connect
 helm install 1password-connect 1password/connect \
+  --namespace argocd \
+  --set-file connect.credentials=secrets/1password-credentials.json
+
+# connect and operator
+helm install 1password-connect 1password/connect \
+  --namespace argocd \
   --set-file connect.credentials=secrets/1password-credentials.json \
   --set operator.create=true \
-  --set operator.token.value=$(openssl rand -base64 32) \
-  --namespace argocd
+  --set operator.token.value=$(openssl rand -base64 32)
 ```
 
-## Try It Out
+## Deploy 1Password Connect Server (Docker)
+
+```bash
+docker-compose up -d
+
+export OP_API_TOKEN=$(cat secrets/1password-token.txt)
+
+curl \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $OP_API_TOKEN" \
+  http://localhost:7777/v1/vaults
+```
+
+## Configure Argo CD CLI
+
+```bash
+kubectl config set-context --current --namespace=argocd
+argocd login --core
+```
+
+## Create A Test Application
+
+```bash
+argocd app create guestbook \
+  --repo https://github.com/argoproj/argocd-example-apps.git \
+  --path guestbook \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace default
+
+argocd app get guestbook
+argocd app sync guestbook
+
+kubectl -n default port-forward svc/guestbook-ui 8888:80
+```
+
+## Test Vault Plugin
 
 ```bash
 argocd repo add https://github.com/n4bb12/argocd-vault-plugin-example.git \
@@ -131,6 +143,12 @@ argocd repo add https://github.com/n4bb12/argocd-vault-plugin-example.git \
   --password $(cat secrets/github-token.txt)
 
 kubectl create ns example
+
+argocd app create example-app-without-op \
+  --repo https://github.com/n4bb12/argocd-vault-plugin-example.git \
+  --path example-app-without-op \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace example
 
 argocd app create example-app \
   --repo https://github.com/n4bb12/argocd-vault-plugin-example.git \
