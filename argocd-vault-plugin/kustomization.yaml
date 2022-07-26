@@ -7,9 +7,9 @@ images:
     newTag: v2.4.7
 
 resources:
-  - namespace.yaml
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.7/manifests/install.yaml
-  - cmp-plugin.yaml
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.12.0/manifests/cmp-sidecar/cmp-plugin.yaml
 
 patchesStrategicMerge:
-  - argocd-repo-server.yaml
+  - https://raw.githubusercontent.com/argoproj-labs/argocd-vault-plugin/v1.12.0/manifests/cmp-sidecar/argocd-repo-server.yaml
+  - argocd-repo-server-patch.yaml
