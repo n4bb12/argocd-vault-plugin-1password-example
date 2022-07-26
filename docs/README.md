@@ -54,4 +54,4 @@ helm install 1password-connect 1password/connect \
 
 ## Troubleshooting
 
-[TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+[Troubleshooting](TROUBLESHOOTING.md)
