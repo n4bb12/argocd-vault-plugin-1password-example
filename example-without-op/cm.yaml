@@ -1,0 +1,9 @@
+# Use a config map instead of secret for easier debugging
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example
+  namespace: example
+data:
+  FOO: FOO
+  BAR: BAR

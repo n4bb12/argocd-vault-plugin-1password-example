@@ -31,7 +31,7 @@ argocd app sync guestbook
 kubectl -n default port-forward svc/guestbook-ui 8888:80
 ```
 
-### Create a Secret Without 1Password
+### Create an App Without 1Password
 
 ```bash
 argocd app create example-without-op \
@@ -40,12 +40,12 @@ argocd app create example-without-op \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace example
 
-argocd app sync example-app-without-op
+argocd app sync example-without-op
 
-kubectl -n example get secret
+kubectl -n example get cm
 ```
 
-### Create a Secret With 1Password
+### Create an App With 1Password
 
 ```bash
 argocd app create example \
@@ -54,9 +54,9 @@ argocd app create example \
   --dest-server https://kubernetes.default.svc \
   --dest-namespace example
 
-argocd app sync example-app
+argocd app sync example
 
-kubectl -n example get secret
+kubectl -n example get cm
 ```
 
 ### Access 1Password Connect Server
