@@ -23,7 +23,7 @@ kind create cluster --name argocd
 - Create a new integration for the vault and save the credentials file to `secrets/1password-credentials.json`
 - Create a new integration access token for the vault and save it to `secrets/1password-token.txt`
 
-## Install Argo CD
+## Deploy Argo CD
 
 - https://argocd-vault-plugin.readthedocs.io/en/stable/config/#kubernetes-secret
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/installation/#kustomize
