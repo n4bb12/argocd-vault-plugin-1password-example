@@ -15,6 +15,14 @@
 kind create cluster --name argocd
 ```
 
+## Create 1Password Integration
+
+- https://developer.1password.com/docs/connect/get-started/#step-1-set-up-a-secrets-automation-workflow
+- Create a new vault named `argocd`
+- Create a new "Secure Note" named `example-app` in the `argocd` vault with an entry `EXAMPLE_KEY=SECRET_VALUE`
+- Create a new integration for the vault and save the credentials file to `secrets/1password-credentials.json`
+- Create a new integration access token for the vault and save it to `secrets/1password-token.txt`
+
 ## Install Argo CD
 
 - https://argocd-vault-plugin.readthedocs.io/en/stable/config/#kubernetes-secret
@@ -31,14 +39,6 @@ kubectl -n argocd create secret generic argocd-vault-plugin \
 kubectl apply -k argocd-vault-plugin
 kubectl -n argocd get pod
 ```
-
-## Create 1Password Integration
-
-- https://developer.1password.com/docs/connect/get-started/#step-1-set-up-a-secrets-automation-workflow
-- Create a new vault named `argocd`
-- Create a new "Secure Note" named `example-app` in the `argocd` vault with an entry `EXAMPLE_KEY=SECRET_VALUE`
-- Create a new integration for the vault and save the credentials file to `secrets/1password-credentials.json`
-- Create a new integration access token for the vault and save it to `secrets/1password-token.txt`
 
 ## Deploy 1Password Connect Server
 
